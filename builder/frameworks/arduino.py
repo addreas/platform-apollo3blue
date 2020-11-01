@@ -25,7 +25,7 @@ env.Append(
             f'@{join(VARIANT_DIR, "mbed", ".c-symbols")}'],
     CXXFLAGS=[f'@{join(VARIANT_DIR, "mbed", ".cxx-flags")}',
               f'@{join(VARIANT_DIR, "mbed", ".cxx-symbols")}'],
-    LINKFLAGS=[# '-Wl,-Map,{build.path}/{build.project_name}.map', # ???
+    LINKFLAGS=[f'-Wl,-Map,{join("$BUILD_DIR", "program.map")}', # ???
                # f'{join(VARIANT_DIR, "mbed/libmbed-os")}.a', # covered by VARIANT_DIR in LIBPATH?
                '--specs=nano.specs',
                '$_CPPDEFFLAGS', # redundant?
@@ -39,7 +39,13 @@ env.Append(
 
     LIBSOURCE_DIRS=[join(FRAMEWORK_DIR, 'libraries')],
 
-    LIBS=[], # ??
+    LIBS=[
+        env.BuildLibrary(join('$BUILD_DIR', 'FrameworkArduinoVariant'), VARIANT_DIR),
+        env.BuildLibrary(join('$BUILD_DIR', 'FrameworkArduino'), join(CORES_DIR, 'arduino')),
+        env.BuildLibrary(join('$BUILD_DIR', 'FrameworkMbed'), join(CORES_DIR, 'mbed-os'), src_filter='+<*> -<TESTS/> -<TEST_APPS/> -<UNITTESTS/>'),
+        env.BuildLibrary(join('$BUILD_DIR', 'FrameworkMbedBridge'), join(CORES_DIR, 'mbed-bridge')),
+        env.BuildLibrary(join('$BUILD_DIR', 'FrameworkMbedBridgeCoreApi'), join(CORES_DIR, 'mbed-bridge-core-api')),
+    ],
 
     CPPDEFINES=[
         ('ARDUINO', 10810),
